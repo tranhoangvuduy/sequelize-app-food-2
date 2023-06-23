@@ -1,117 +1,93 @@
 import { Sequelize } from 'sequelize';
 import initModels from '../models/init-models.js';
 import sequelize from '../models/index.js';
-import { errorCode, successCode } from '../config/response.js';
-
+import { errorCode, successCode, failCode } from '../config/response.js';
 const models = initModels(sequelize);
-// enviroment => biến môi trường
-// Op
-const Op = Sequelize.Op;
-const getNguoiDung = async (req, res) => {
+
+//Post: Create Like_res
+const createLike = async (req, res) => {
     try {
-        // sự dụng các hàm truy vấn data của sequelize
-        // SELECT * FROM food JOIN food_type ON ... WHERE food_name LIKE '%a%';
-
-        sequelize.query('SELECT * FROM food WHERE food_id = \'abc\' ');
-
-        let data = await models.food.findAll({
-            include: ["user_id_user_orders"]
+      let { user_id, res_id, date_like } = req.body;
+  
+      let result = await models.like_res.create({
+        user_id,
+        res_id,
+        date_like,
+      });
+      successCode(res, result, "Người dùng like thành công!!!");
+    } catch (err) {
+      errorCode(res, "Lỗi Backend");
+    }
+  };
+  
+  // Delete: UnLike
+  const UnLike = async (req, res) => {
+    try {
+      let { user_id, res_id } = req.params;
+      let checkUser = await models.like_res.findOne({
+        where: {
+          user_id,
+          res_id,
+        },
+      });
+  
+      if (checkUser) {
+        models.like_res.destroy({
+          where: {
+            user_id,
+            res_id,
+          },
         });
-
-
-        // localhost:8080/api/user/get-nguoi-dung
-        // res.status(200).send(data);
-        successCode(res, data, "Lấy dữ liệu thành công");
+        successCode(res, checkUser, "Xoá like thành công!!!");
+      } else {
+        failCode(
+          res,
+          user_id,
+          `User thứ ${user_id} chưa like cho nhà hàng thứ ${res_id} này!!!`
+        );
+      }
+    } catch (err) {
+      errorCode(res, "Lỗi Backend");
     }
-    catch {
-        // res.status(500).send("Lỗi BE")
-        errorCode(res, "Lỗi BE");
-        // res.send(error.message);
-    }
-};
-// Create
-const createNguoiDung = async (req, res) => {
+  };
+  
+  //Post: Create Rate_res
+  const createRateRes = async (req, res) => {
     try {
-        // client data request body
-        let { full_name, email, pass_word, } = req.body;
-
-        // await Food_Type.findAll({where})
-
-        let newData = {
-            full_name,
-            email,
-            pass_word,
-        };
-
-        // INSERT INTO food VALUES ()
-        await models.user.create(newData);
-
-        res.status(200).send("Thêm mới thành công");
-    } catch {
-        res.status(500).send("Lỗi BE")
+      let { user_id, res_id, amount, date_rate } = req.body;
+  
+      let result = await models.rate_res.create({
+        user_id,
+        res_id,
+        amount,
+        date_rate,
+      });
+      successCode(res, result, "Người dùng đánh giá thành công!!!");
+    } catch (err) {
+      errorCode(res, "Lỗi Backend");
     }
-}
-// Update
-const updateNguoiDung = async (req, res) => {
+  };
+  
+  //Post: Create Order
+  const createOrder = async (req, res) => {
     try {
-        let { user_id } = req.params;
-        // client data request body
-        let { full_name, email, pass_word, } = req.body;
-
-        await models.user.update({
-            full_name,
-            email,
-            pass_word,
-        }, { where: { user_id } })
-        res.status(200).send("Cập nhật thành công")
-    } catch {
-        res.status(500).send("Lỗi BE")
+      let { user_id, food_id, amount, code, arr_sub_id } = req.body;
+  
+      let result = await models.order.create({
+        user_id,
+        food_id,
+        amount,
+        code,
+        arr_sub_id,
+      });
+      successCode(res, result, "Người dùng order thành công!!!");
+    } catch (err) {
+      errorCode(res, "Lỗi Backend");
     }
-
-}
-// Delete
-const removeNguoiDung = async (req, res) => {
-    try {
-
-        let { user_id } = req.params;
-        // check tồn tại
-        // [{},{},{}]
-        // {}
-        let checkFood = await models.user.findAll({ where: { user_id } });
-        if (checkFood.length > 0) {
-            // DELETE FROM food WHERE user_id = 12;
-            await models.user.destroy({ where: { user_id } })
-            res.status(200).send("Xóa thành công")
-        } else {
-            res.status(404).send("Item không tồn tại")
-        }
+  };
+  
+  export { createLike, UnLike, createRateRes, createOrder };
+  
+  
 
 
-    }
-    catch {
-        res.status(500).send("Lỗi BE")
-    }
-}
-
-const getUserPage = async (req, res) => {
-    let { page, pageSize } = req.params;
-    let index = (page - 1) * pageSize;
-
-    // SELECT * FROM user LIMIT index, pageSize
-
-    // tổng sl (9) / tổng sl trên trang (6) = 1,5 = 2
-
-    let data = await models.user.findAll({
-        offset: index,
-        limit: Number(pageSize)
-    });
-    successCode(res, data, "Thành công");
-}
-
-export {
-    getNguoiDung,
-    createNguoiDung,
-    updateNguoiDung,
-    removeNguoiDung,
-    getUserPage
-}

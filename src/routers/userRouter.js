@@ -1,19 +1,22 @@
 
-import { getNguoiDung, createNguoiDung, updateNguoiDung, removeNguoiDung, getUserPage } from "../controllers/userController.js";
+import { createLike, UnLike, createRateRes, createOrder } from "../controllers/userController.js";
 
 import express from 'express';
 
 const userRouter = express.Router();
 
+userRouter.post("/createLike", createLike);
 
-userRouter.get("/get-nguoi-dung", getNguoiDung)
-//userRouter.get("/get-nguoi-dung-by-id/:food_id", getNguoiDungId)
-userRouter.post("/create-nguoi-dung", createNguoiDung)
-userRouter.put("/update-nguoi-dung/:user_id", updateNguoiDung)
-userRouter.delete("/remove-nguoi-dung/:user_id", removeNguoiDung)
+userRouter.post("/createRateRes", createRateRes);
 
+userRouter.post("/createOrder", createOrder);
 
-//Pagination
-userRouter.get("/get-user-page/:page/:pageSize", getUserPage)
+userRouter.delete("/UnLike/:user_id/:res_id", UnLike);
 
 export default userRouter;
+
+
+
+
+
+
