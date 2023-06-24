@@ -64,7 +64,7 @@ const createLike = async (req, res) => {
       });
       successCode(res, result, "Người dùng đánh giá thành công!!!");
     } catch (err) {
-      errorCode(res, "Lỗi Backend");
+      errorCode(res, "Lỗi Backend" );
     }
   };
   
